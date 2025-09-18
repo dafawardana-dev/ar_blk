@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model dataKelas {
+  id         Int      @id @default(autoincrement())
+  nama       String
+  email      String   @unique
+  noHp       String
+  jk         JenisKelamin
+  tempatOjt  String
+  sertifikat String?   
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum JenisKelamin {
+  LAKI
+  PEREMPUAN
+}
+
+
+model dataModul {
+  id         Int      @id @default(autoincrement())
+  judul      String
+  deskripsi  String
+  tgl        DateTime
+  dokumen    String?   // nullable, jika kadang tidak ada file
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model dataArsip {
+  id         Int      @id @default(autoincrement())
+  nomor      String
+  judul      String
+  deskripsi  String?
+  tglSurat   DateTime
+  pengirim   String?    // khusus surat masuk
+  penerima   String?    // khusus surat keluar
+  dokumen    String?    // path / url file
+  createdAt  DateTime   @default(now())
+}

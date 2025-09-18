@@ -1,0 +1,89 @@
+
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
+export const getAllArsip = async (req, res) => {
+  try {
+    const arsip = await prisma.dataArsip.findMany();
+    res.status(200).json(arsip);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getArsipById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const arsip = await prisma.dataArsip.findUnique({
+      where: { id: parseInt(id) },
+    });
+    if (!arsip) {
+      return res.status(404).json({ message: 'Arsip tidak ditemukan' });
+    }
+    res.status(200).json(arsip);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const createArsip = async (req, res) => {
+  const { nomor, judul, deskripsi, tglSurat, pengirim, penerima, dokumen } = req.body;
+  try {
+    const newArsip = await prisma.dataArsip.create({
+      data: {
+        nomor,
+        judul,
+        deskripsi,
+        tglSurat: new Date(tglSurat),
+        pengirim,
+        penerima,
+        dokumen,
+      },
+    });
+    res.status(201).json(newArsip);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateArsip = async (req, res) => {
+  const { id } = req.params;
+  const { nomor, judul, deskripsi, tglSurat, pengirim, penerima, dokumen } = req.body;
+  try {
+    const updatedArsip = await prisma.dataArsip.update({
+      where: { id: parseInt(id) },
+      data: {
+        nomor,
+        judul,
+        deskripsi,
+        tglSurat: new Date(tglSurat),
+        pengirim,
+        penerima,
+        dokumen,
+      },
+    });
+    res.status(200).json(updatedArsip);
+  } catch (error) {
+    if (error.code === 'P2025') {
+      res.status(404).json({ message: 'Arsip tidak ditemukan' });
+    } else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+};
+
+export const deleteArsip = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.dataArsip.delete({
+      where: { id: parseInt(id) },
+    });
+    res.status(200).json({ message: 'Arsip berhasil dihapus' });
+  } catch (error) {
+    if (error.code === 'P2025') {
+      res.status(404).json({ message: 'Arsip tidak ditemukan' });
+    } else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+};

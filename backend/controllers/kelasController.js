@@ -1,0 +1,98 @@
+
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
+// GET semua data kelas
+export const getAllKelas = async (req, res) => {
+  try {
+    const kelas = await prisma.dataKelas.findMany();
+    res.status(200).json(kelas);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// GET kelas by ID
+export const getKelasById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const kelas = await prisma.dataKelas.findUnique({
+      where: { id: parseInt(id) },
+    });
+    if (!kelas) {
+      return res.status(404).json({ message: 'Data kelas tidak ditemukan' });
+    }
+    res.status(200).json(kelas);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// POST create kelas baru
+export const createKelas = async (req, res) => {
+  const { nama, email, noHp, jk, tempatOjt, sertifikat } = req.body;
+  try {
+    const newKelas = await prisma.dataKelas.create({
+      data: {
+        nama,
+        email,
+        noHp,
+        jk,
+        tempatOjt,
+        sertifikat,
+      },
+    });
+    res.status(201).json(newKelas);
+  } catch (error) {
+    if (error.code === 'P2002') {
+      res.status(400).json({ message: 'Email sudah terdaftar' });
+    } else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+};
+
+// PUT update kelas
+export const updateKelas = async (req, res) => {
+  const { id } = req.params;
+  const { nama, email, noHp, jk, tempatOjt, sertifikat } = req.body;
+  try {
+    const updatedKelas = await prisma.dataKelas.update({
+      where: { id: parseInt(id) },
+      data: {
+        nama,
+        email,
+        noHp,
+        jk,
+        tempatOjt,
+        sertifikat,
+      },
+    });
+    res.status(200).json(updatedKelas);
+  } catch (error) {
+    if (error.code === 'P2025') {
+      res.status(404).json({ message: 'Data kelas tidak ditemukan' });
+    } else if (error.code === 'P2002') {
+      res.status(400).json({ message: 'Email sudah terdaftar' });
+    } else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+};
+
+// DELETE kelas
+export const deleteKelas = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.dataKelas.delete({
+      where: { id: parseInt(id) },
+    });
+    res.status(200).json({ message: 'Data kelas berhasil dihapus' });
+  } catch (error) {
+    if (error.code === 'P2025') {
+      res.status(404).json({ message: 'Data kelas tidak ditemukan' });
+    } else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+};
