@@ -20,7 +20,8 @@ model dataKelas {
   email      String   @unique
   noHp       String
   jk         JenisKelamin
-  tempatOjt  String
+  tempatOjt  String  
+  namaKelas  String?  
   sertifikat String?   
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -37,7 +38,7 @@ model dataModul {
   judul      String
   deskripsi  String
   tgl        DateTime
-  dokumen    String?   // nullable, jika kadang tidak ada file
+  dokumen    String?   
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

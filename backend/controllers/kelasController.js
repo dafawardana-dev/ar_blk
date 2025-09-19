@@ -30,8 +30,17 @@ export const getKelasById = async (req, res) => {
 
 // POST create kelas baru
 export const createKelas = async (req, res) => {
-  const { nama, email, noHp, jk, tempatOjt, sertifikat } = req.body;
   try {
+    const {
+      nama,
+      email,
+      noHp,
+      jk,
+      tempatOjt,
+      namaKelas,
+    } = req.body;
+
+   const sertifikatPath = `/uploads/${req.file.filename}`; // Simpan path relatif
     const newKelas = await prisma.dataKelas.create({
       data: {
         nama,
@@ -39,24 +48,26 @@ export const createKelas = async (req, res) => {
         noHp,
         jk,
         tempatOjt,
-        sertifikat,
+        namaKelas,
+        sertifikat: sertifikatPath, // Simpan ke database
       },
     });
+
     res.status(201).json(newKelas);
   } catch (error) {
+    console.error("Error creating kelas:", error); // Log error untuk debugging
     if (error.code === 'P2002') {
-      res.status(400).json({ message: 'Email sudah terdaftar' });
-    } else {
-      res.status(500).json({ error: error.message });
+      return res.status(400).json({ error: 'Email sudah terdaftar' });
     }
+    res.status(400).json({ error: error.message });
   }
 };
 
 // PUT update kelas
 export const updateKelas = async (req, res) => {
-  const { id } = req.params;
-  const { nama, email, noHp, jk, tempatOjt, sertifikat } = req.body;
   try {
+    const { id } = req.params;
+    const { nama, email, noHp, jk, tempatOjt, namaKelas, sertifikat } = req.body;
     const updatedKelas = await prisma.dataKelas.update({
       where: { id: parseInt(id) },
       data: {
@@ -65,6 +76,7 @@ export const updateKelas = async (req, res) => {
         noHp,
         jk,
         tempatOjt,
+        namaKelas ,
         sertifikat,
       },
     });
@@ -96,3 +108,18 @@ export const deleteKelas = async (req, res) => {
     }
   }
 };
+
+export const fileUpload = async (req,res) => {
+  const file = req.file
+  if(!file) {
+    return res.status(404).json({
+      message: "File Not Found"
+    })
+  }
+  const fileSertif = file.filename;
+  const pathFile = `/middleware/uploads/${fileSertif}`
+  res.status(200).json({
+    message: "File Sucsess Uploaded",
+    file: pathFile
+  })
+}

@@ -6,6 +6,7 @@ CREATE TABLE `dataKelas` (
     `noHp` VARCHAR(191) NOT NULL,
     `jk` ENUM('LAKI', 'PEREMPUAN') NOT NULL,
     `tempatOjt` VARCHAR(191) NOT NULL,
+    `namaKelas` VARCHAR(191) NOT NULL,
     `sertifikat` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,

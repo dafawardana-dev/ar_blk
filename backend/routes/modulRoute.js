@@ -3,7 +3,7 @@ import express from 'express';
 import {
   getAllModul,
   getModulById,
-  // createModul,
+  createModul,
   updateModul,
   deleteModul,
 } from '../controllers/modulController.js';

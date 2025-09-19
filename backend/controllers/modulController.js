@@ -25,8 +25,8 @@ export const getModulById = async (req, res) => {
   }
 };
 
-// ✅ Perbaikan di Controller (src/controllers/modulController.js)
-const createModul = async (req, res) => {
+
+export const createModul = async (req, res) => {
   const { judul, deskripsi, tgl, dokumen } = req.body;
 
   // Validasi: Pastikan `tgl` ada dan bukan string kosong
@@ -40,7 +40,7 @@ const createModul = async (req, res) => {
     return res.status(400).json({ error: 'Format tanggal tidak valid' });
   }
 
-  // Validasi: Cegah tanggal yang terlalu jauh di masa lalu (opsional)
+  
   if (parsedDate < new Date('1980-01-01')) {
     return res.status(400).json({ error: 'Tanggal tidak boleh sebelum tahun 1980' });
   }
@@ -50,7 +50,7 @@ const createModul = async (req, res) => {
       data: {
         judul,
         deskripsi,
-        tgl: parsedDate, // Gunakan tanggal yang sudah divalidasi
+        tgl: parsedDate, 
         dokumen,
       },
     });
