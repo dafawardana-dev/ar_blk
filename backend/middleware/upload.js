@@ -8,13 +8,14 @@ const FILE_TYPE = {
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
 };
 
+// middleware/upload.js
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const isValid = FILE_TYPE[file.mimetype];
     if (!isValid) {
-      return cb(new Error("Tipe file tidak diizinkan. Hanya PDF, DOC, DOCX."), false);
+      return cb(new Error("Tipe file tidak diizinkan."), false);
     }
-    cb(null, "uploads/");
+    cb(null, "uploads/"); 
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

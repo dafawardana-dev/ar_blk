@@ -1,12 +1,14 @@
-// src/pages/TambahKelas.jsx
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// src/pages/EditKelas.jsx
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 import Card from "../components/ui/card.jsx";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 
-export default function TambahKelas() {
+export default function EditKelas() {
   const navigate = useNavigate();
+  const { id } = useParams(); // Ambil ID dari URL: /edit/:id
+
   const [formData, setFormData] = useState({
     nama: "",
     email: "",
@@ -15,9 +17,35 @@ export default function TambahKelas() {
     tempatOjt: "",
     namaKelas: "",
   });
+
   const [selectedFile, setSelectedFile] = useState(null);
+  const [currentSertifikat, setCurrentSertifikat] = useState(null); // Untuk menampilkan file lama
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Fetch data peserta saat komponen mount
+  useEffect(() => {
+    const fetchPeserta = async () => {
+      try {
+        const response = await api.get(`/kelas/${id}`);
+        const peserta = response.data;
+        setFormData({
+          nama: peserta.nama,
+          email: peserta.email,
+          noHp: peserta.noHp,
+          jk: peserta.jk,
+          tempatOjt: peserta.tempatOjt || "",
+          namaKelas: peserta.namaKelas,
+        });
+        setCurrentSertifikat(peserta.sertifikat); // Simpan URL sertifikat lama
+      } catch (err) {
+        console.error("Gagal mengambil data peserta:", err);
+        setError("Gagal memuat data peserta. Silakan coba lagi.");
+      }
+    };
+
+    fetchPeserta();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,22 +69,23 @@ export default function TambahKelas() {
     formDataToSend.append('tempatOjt', formData.tempatOjt);
     formDataToSend.append('namaKelas', formData.namaKelas);
 
+    // Hanya tambahkan file jika ada file baru yang dipilih
     if (selectedFile) {
       formDataToSend.append('sertifikat', selectedFile);
     }
 
     try {
-      await api.post("/kelas", formDataToSend, {
+      await api.put(`/kelas/${id}`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
       navigate("/kelas", { 
-        state: { message: "Peserta berhasil ditambahkan!" } 
+        state: { message: "Data peserta berhasil diperbarui!" } 
       });
     } catch (err) {
-      console.error("Full error:", err); // Sangat penting untuk debugging!
-      setError(err.response?.data?.error || "Gagal menambahkan peserta. Silakan coba lagi.");
+      console.error("Full error:", err);
+      setError(err.response?.data?.error || "Gagal memperbarui peserta. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -72,7 +101,7 @@ export default function TambahKelas() {
           <ArrowLeftIcon className="h-5 w-5 mr-1" />
           Kembali
         </button>
-        
+        <h1 className="text-2xl font-bold text-gray-800">Edit Data Peserta</h1>
       </div>
 
       <Card>
@@ -170,10 +199,29 @@ export default function TambahKelas() {
             </div>
           </div>
 
-          {/* Upload File */}
+          {/* Tampilkan Sertifikat Saat Ini */}
+          {currentSertifikat && (
+            <div className="md:col-span-2 p-4 bg-gray-50 rounded-md">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Sertifikat Saat Ini</h3>
+              <a
+                href={currentSertifikat}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline flex items-center"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                Lihat Sertifikat Saat Ini
+              </a>
+            </div>
+          )}
+
+          {/* Upload File Baru (Opsional) */}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Upload Sertifikat (PDF, DOC, DOCX, maks 10MB)
+              {currentSertifikat ? "Ganti Sertifikat (Opsional)" : "Upload Sertifikat (PDF, DOC, DOCX, maks 10MB)"}
             </label>
             <input
               type="file"
@@ -189,7 +237,7 @@ export default function TambahKelas() {
             />
             {selectedFile && (
               <p className="mt-1 text-sm text-gray-500">
-                File terpilih: <span className="font-medium">{selectedFile.name}</span>
+                File baru: <span className="font-medium">{selectedFile.name}</span>
               </p>
             )}
           </div>
@@ -216,7 +264,7 @@ export default function TambahKelas() {
                   Menyimpan...
                 </>
               ) : (
-                "Simpan Peserta"
+                "Simpan Perubahan"
               )}
             </button>
           </div>

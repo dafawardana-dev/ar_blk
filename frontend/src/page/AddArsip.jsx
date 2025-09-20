@@ -5,15 +5,15 @@ import api from "../services/api";
 import Card from "../components/ui/card.jsx";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 
-export default function TambahKelas() {
+export default function TambahArsip() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    nama: "",
-    email: "",
-    noHp: "",
-    jk: "LAKI",
-    tempatOjt: "",
+    nomor: "",
+    judul: "",
+    deskripsi: "",
     namaKelas: "",
+    dokumen: "",
+    createdAt: new Date().toISOString().split("T")[0], // Format YYYY-MM-DD
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -34,29 +34,31 @@ export default function TambahKelas() {
     setError("");
 
     const formDataToSend = new FormData();
-    formDataToSend.append('nama', formData.nama);
-    formDataToSend.append('email', formData.email);
-    formDataToSend.append('noHp', formData.noHp);
-    formDataToSend.append('jk', formData.jk);
-    formDataToSend.append('tempatOjt', formData.tempatOjt);
-    formDataToSend.append('namaKelas', formData.namaKelas);
+    formDataToSend.append("nomor", formData.nomor);
+    formDataToSend.append("judul", formData.judul);
+    formDataToSend.append("deskripsi", formData.deskripsi);
+    formDataToSend.append("namaKelas", formData.namaKelas);
+    formDataToSend.append("dokumen", formData.dokumen);
 
     if (selectedFile) {
-      formDataToSend.append('sertifikat', selectedFile);
+      formDataToSend.append("dokumenArsip", selectedFile);
     }
 
     try {
-      await api.post("/kelas", formDataToSend, {
+      await api.post("/arsip", formDataToSend, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
-      navigate("/kelas", { 
-        state: { message: "Peserta berhasil ditambahkan!" } 
+      navigate("/arsip", {
+        state: { message: "Dokumen berhasil ditambahkan!" },
       });
     } catch (err) {
       console.error("Full error:", err); // Sangat penting untuk debugging!
-      setError(err.response?.data?.error || "Gagal menambahkan peserta. Silakan coba lagi.");
+      setError(
+        err.response?.data?.error ||
+          "Gagal menambahkan Dokumen. Silakan coba lagi."
+      );
     } finally {
       setLoading(false);
     }
@@ -72,7 +74,6 @@ export default function TambahKelas() {
           <ArrowLeftIcon className="h-5 w-5 mr-1" />
           Kembali
         </button>
-        
       </div>
 
       <Card>
@@ -86,12 +87,12 @@ export default function TambahKelas() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nama Lengkap <span className="text-red-500">*</span>
+                Nomor Surat <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                name="nama"
-                value={formData.nama}
+                name="nomor"
+                value={formData.nomor}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -99,74 +100,68 @@ export default function TambahKelas() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                No. HP <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                name="noHp"
-                value={formData.noHp}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Jenis Kelamin <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="jk"
-                value={formData.jk}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="LAKI">Laki-laki</option>
-                <option value="PEREMPUAN">Perempuan</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tempat OJT
+                Judul Dokumen Arsi <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                name="tempatOjt"
-                value={formData.tempatOjt}
+                name="judul"
+                value={formData.judul}
                 onChange={handleChange}
+                required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nama Kelas <span className="text-red-500">*</span>
+                Deskripsi<span className="text-red-500">*</span>
               </label>
-              <select
-                name="namaKelas"
-                value={formData.namaKelas}
+              <input
+                type="text"
+                name="deskripsi"
+                value={formData.deskripsi}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Pilih Kelas</option>
-                <option value="Web Node JS">Web Node JS</option>
-                <option value="Digital Marketing">Digital Marketing</option>
-                <option value="Artificial Intelligence">Artificial Intelligence</option>
-                <option value="UI/UX Design">UI/UX Design</option>
-              </select>
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tanggal Surat<span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                name="tglSurat"
+                value={formData.tglSurat}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              ></input>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Pengirim Surat <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="pengirim"
+                value={formData.pengirim}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Penerima Surat <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="penerima"
+                value={formData.penerima}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
           </div>
 
@@ -177,7 +172,7 @@ export default function TambahKelas() {
             </label>
             <input
               type="file"
-              name="sertifikat"
+              name="dokumen"
               accept=".pdf,.doc,.docx"
               onChange={handleFileChange}
               className="block w-full text-sm text-gray-500
@@ -189,7 +184,8 @@ export default function TambahKelas() {
             />
             {selectedFile && (
               <p className="mt-1 text-sm text-gray-500">
-                File terpilih: <span className="font-medium">{selectedFile.name}</span>
+                File terpilih:{" "}
+                <span className="font-medium">{selectedFile.name}</span>
               </p>
             )}
           </div>
@@ -209,14 +205,30 @@ export default function TambahKelas() {
             >
               {loading ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Menyimpan...
                 </>
               ) : (
-                "Simpan Peserta"
+                "Simpan Dokumen"
               )}
             </button>
           </div>

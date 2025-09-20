@@ -10,9 +10,9 @@ import {
 
 const router = express.Router();
 
+router.post('/', upload.single('dokumenArsip'), createArsip); 
 router.get('/', getAllArsip);
 router.get('/:id', getArsipById);
-router.post('/', createArsip);
 router.put('/:id', updateArsip);
 router.delete('/:id', deleteArsip);
 

@@ -37,7 +37,6 @@ model dataModul {
   id         Int      @id @default(autoincrement())
   judul      String
   deskripsi  String
-  tgl        DateTime
   dokumen    String?   
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -49,8 +48,8 @@ model dataArsip {
   judul      String
   deskripsi  String?
   tglSurat   DateTime
-  pengirim   String?    // khusus surat masuk
-  penerima   String?    // khusus surat keluar
-  dokumen    String?    // path / url file
+  pengirim   String?    
+  penerima   String?    
+  dokumen    String?    
   createdAt  DateTime   @default(now())
 }

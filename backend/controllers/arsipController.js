@@ -27,17 +27,22 @@ export const getArsipById = async (req, res) => {
 };
 
 export const createArsip = async (req, res) => {
-  const { nomor, judul, deskripsi, tglSurat, pengirim, penerima, dokumen } = req.body;
+  const { nomor, judul, deskripsi, tglSurat, pengirim, penerima } = req.body;
+
+   let  dokumenArsip = null;
+    if (req.file) {
+       dokumenArsip = `/uploads/${req.file.filename}`; 
+    }
   try {
     const newArsip = await prisma.dataArsip.create({
       data: {
         nomor,
         judul,
         deskripsi,
-        tglSurat: new Date(tglSurat),
+        tglSurat,
         pengirim,
         penerima,
-        dokumen,
+        dokumen : dokumenArsip,
       },
     });
     res.status(201).json(newArsip);
@@ -86,4 +91,19 @@ export const deleteArsip = async (req, res) => {
       res.status(500).json({ error: error.message });
     }
   }
+};
+
+export const fileUpload = async (req, res) => {
+  const file = req.file;
+  if (!file) {
+    return res.status(404).json({
+      message: "File Not Found",
+    });
+  }
+  const fileArsip = file.filename;
+  const arsipFile = `/middleware/uploads/${fileArsip}`;
+  res.status(200).json({
+    message: "File Sucsess Uploaded",
+    file: arsipFile,
+  });
 };

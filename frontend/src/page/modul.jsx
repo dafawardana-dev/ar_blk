@@ -5,7 +5,7 @@ import useSWR from "swr";
 import Table from "../components/ui/Table.jsx";
 import Card from "../components/ui/card.jsx";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
-import api from "../services/api";
+import api from "../services/api.jsx";
 
 const fetcher = (url) => api.get(url).then((res) => res.data);
 
@@ -18,13 +18,13 @@ const KATEGORI_KELAS = [
   { id: "UI/UX Design", nama: "UI/UX Design" },
 ];
 
-export default function Kelas() {
+export default function Modul() {
   const {
-    data: kelasList = [],
+    data: modulList = [],
     error,
     isLoading,
     mutate,
-  } = useSWR("/kelas", fetcher);
+  } = useSWR("/modul", fetcher);
 
   const [selectedKelas, setSelectedKelas] = useState("all");
   const [previewFile, setPreviewFile] = useState(null); // State untuk modal
@@ -34,7 +34,7 @@ export default function Kelas() {
     if (!window.confirm("Apakah Anda yakin ingin menghapus data ini?")) return;
 
     try {
-      await api.delete(`/kelas/${id}`);
+      await api.delete(`/modul/${id}`);
       mutate(); // Refresh data
     } catch (err) {
       alert("Gagal menghapus data");
@@ -52,10 +52,10 @@ export default function Kelas() {
   // Memoisasi data yang sudah difilter
   const filteredData = useMemo(() => {
     if (selectedKelas === "all") {
-      return kelasList;
+      return modulList;
     }
-    return kelasList.filter((item) => item.namaKelas === selectedKelas);
-  }, [kelasList, selectedKelas]);
+    return modulList.filter((item) => item.namaKelas === selectedKelas);
+  }, [modulList, selectedKelas]);
 
   if (error)
     return (
@@ -74,7 +74,7 @@ export default function Kelas() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">Daftar Peserta Kelas</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-800">Daftar Modul Kelas</h1>
 
       {/* Filter Kelas */}
       <div className="mb-6">
@@ -100,11 +100,11 @@ export default function Kelas() {
         {/* Header Tabel */}
         <div className="flex justify-between items-center mb-6">
           <span className="text-sm text-gray-500">
-            Menampilkan {filteredData.length} peserta
+            Menampilkan {filteredData.length} modul
           </span>
-          <Link to="/tambahkelas">
+          <Link to="/tambahmodul">
             <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors shadow-sm">
-              + Tambah Peserta
+              + Tambah Modul
             </button>
           </Link>
         </div>
@@ -114,13 +114,11 @@ export default function Kelas() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. HP</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">JK</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Judul</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tempat OJT</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sertifikat</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modul</th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
             </tr>
           </thead>
@@ -128,25 +126,22 @@ export default function Kelas() {
             {filteredData.length === 0 ? (
               <tr>
                 <td colSpan="9" className="px-4 py-12 text-center">
-                  <div className="text-gray-500">Tidak ada data peserta untuk kelas ini.</div>
+                  <div className="text-gray-500">Tidak ada data modul untuk kelas ini.</div>
                 </td>
               </tr>
             ) : (
               filteredData.map((data, index) => (
                 <tr key={data.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">{index + 1}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{data.nama}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.email}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.noHp}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {data.jk === "LAKI" ? "Laki-laki" : "Perempuan"}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.namaKelas || "-"}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.tempatOjt || "-"}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{data.judul}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.deskripsi}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.namaKelas }</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.createdAt }</td>
+                  {/* <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.dokumen}</td> */}
                   <td className="px-4 py-4 whitespace-nowrap text-sm">
-                    {data.sertifikat ? (
+                    {data.dokumen ? (
                       <button
-                        onClick={() => handlePreview(data.sertifikat)}
+                        onClick={() => handlePreview(data.dokumen)}
                         className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 transition"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,7 +156,7 @@ export default function Kelas() {
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
                     <Link
-                      to={`/edit/${data.id}`}
+                      to={`/editmodul/${data.id}`}
                       className="text-blue-500 hover:text-blue-700 p-2 rounded transition-colors"
                       title="Edit"
                     >

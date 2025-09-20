@@ -1,5 +1,4 @@
-
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // GET semua data kelas
@@ -20,7 +19,7 @@ export const getKelasById = async (req, res) => {
       where: { id: parseInt(id) },
     });
     if (!kelas) {
-      return res.status(404).json({ message: 'Data kelas tidak ditemukan' });
+      return res.status(404).json({ message: "Data kelas tidak ditemukan" });
     }
     res.status(200).json(kelas);
   } catch (error) {
@@ -31,16 +30,13 @@ export const getKelasById = async (req, res) => {
 // POST create kelas baru
 export const createKelas = async (req, res) => {
   try {
-    const {
-      nama,
-      email,
-      noHp,
-      jk,
-      tempatOjt,
-      namaKelas,
-    } = req.body;
+    const { nama, email, noHp, jk, tempatOjt, namaKelas } = req.body;
 
-   const sertifikatPath = `/uploads/${req.file.filename}`; // Simpan path relatif
+    // src/controllers/kelasController.js
+    let sertifikatPath = null;
+    if (req.file) {
+      sertifikatPath = `/uploads/${req.file.filename}`; 
+    } // Simpan path relatif
     const newKelas = await prisma.dataKelas.create({
       data: {
         nama,
@@ -56,8 +52,8 @@ export const createKelas = async (req, res) => {
     res.status(201).json(newKelas);
   } catch (error) {
     console.error("Error creating kelas:", error); // Log error untuk debugging
-    if (error.code === 'P2002') {
-      return res.status(400).json({ error: 'Email sudah terdaftar' });
+    if (error.code === "P2002") {
+      return res.status(400).json({ error: "Email sudah terdaftar" });
     }
     res.status(400).json({ error: error.message });
   }
@@ -76,16 +72,16 @@ export const updateKelas = async (req, res) => {
         noHp,
         jk,
         tempatOjt,
-        namaKelas ,
+        namaKelas,
         sertifikat,
       },
     });
     res.status(200).json(updatedKelas);
   } catch (error) {
-    if (error.code === 'P2025') {
-      res.status(404).json({ message: 'Data kelas tidak ditemukan' });
-    } else if (error.code === 'P2002') {
-      res.status(400).json({ message: 'Email sudah terdaftar' });
+    if (error.code === "P2025") {
+      res.status(404).json({ message: "Data kelas tidak ditemukan" });
+    } else if (error.code === "P2002") {
+      res.status(400).json({ message: "Email sudah terdaftar" });
     } else {
       res.status(500).json({ error: error.message });
     }
@@ -99,27 +95,27 @@ export const deleteKelas = async (req, res) => {
     await prisma.dataKelas.delete({
       where: { id: parseInt(id) },
     });
-    res.status(200).json({ message: 'Data kelas berhasil dihapus' });
+    res.status(200).json({ message: "Data kelas berhasil dihapus" });
   } catch (error) {
-    if (error.code === 'P2025') {
-      res.status(404).json({ message: 'Data kelas tidak ditemukan' });
+    if (error.code === "P2025") {
+      res.status(404).json({ message: "Data kelas tidak ditemukan" });
     } else {
       res.status(500).json({ error: error.message });
     }
   }
 };
 
-export const fileUpload = async (req,res) => {
-  const file = req.file
-  if(!file) {
+export const fileUpload = async (req, res) => {
+  const file = req.file;
+  if (!file) {
     return res.status(404).json({
-      message: "File Not Found"
-    })
+      message: "File Not Found",
+    });
   }
   const fileSertif = file.filename;
-  const pathFile = `/middleware/uploads/${fileSertif}`
+  const pathFile = `/middleware/uploads/${fileSertif}`;
   res.status(200).json({
     message: "File Sucsess Uploaded",
-    file: pathFile
-  })
-}
+    file: pathFile,
+  });
+};

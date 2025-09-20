@@ -1,7 +1,7 @@
 // src/components/layout/Sidebar.jsx
 import React from "react";
 import { Link } from "react-router-dom";
-import logo from "./../../assets/logo.png";
+import logo from "./../../assets/lgWhite.png";
 import { 
   HomeIcon, 
   FolderIcon, 
@@ -11,12 +11,12 @@ import {
 // src/components/layouts/sidebar.jsx
 export default function Sidebar() {
   return (
-    <div className="w-64 bg-[#154D71] text-gray-300 min-h-screen p-4">
+    <div className="w-70 bg-[#154D71] text-gray-300 min-h-screen p-4">
       <div className="flex items-center mb-6">
         <img
           src={logo}
           alt="BLK Logo"
-          className="h-20 w-50 mt-4 "/>
+          className="h-20 w-60  mt-4 "/>
         {/* <h1 className="text-xl font-bold">Arsip </h1><br/>
         <h2 className="text-xl font-bold">Balai Latihan Kerja</h2> */}
       </div>
