@@ -14,7 +14,7 @@ const KATEGORI_ARSIP = [
   { id: "all", nama: "Semua Jenis Arsip" },
   { id: "Surat Masuk", nama: "Surat Masuk" },
   { id: "Surat Keluar", nama: "Surat Keluar" },
-  { id: "Arsip Dokumen", nama: "Arsip Dokumen" },
+  { id: "Arsip Dokumen OJT", nama: "Arsip Dokumen OJT" },
 
 ];
 export default function Arsip() {
@@ -158,7 +158,7 @@ export default function Arsip() {
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
                     <Link
-                      to={`/editarsip/${data.id}`}
+                      to={`/arsip/edit/${data.id}`}
                       className="text-blue-500 hover:text-blue-700 p-2 rounded transition-colors"
                       title="Edit"
                     >

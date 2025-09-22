@@ -24,7 +24,7 @@ export default function Sidebar() {
         <ul className="mt-6 space-y-1">
           <li >
             <Link
-              to="/"
+              to="/dashboard"
               className="flex items-center space-x-3 py-2 px-4 rounded-lg text-gray-100 hover:bg-gray-600 transition-colors duration-200"
             >
               <HomeIcon className="h-5 w-5 mr-3" />

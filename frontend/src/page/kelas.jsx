@@ -6,6 +6,10 @@ import Table from "../components/ui/Table.jsx";
 import Card from "../components/ui/card.jsx";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
 import api from "../services/api";
+import { Viewer } from '@react-pdf-viewer/core';
+import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
+import '@react-pdf-viewer/core/lib/styles/index.css';
+import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 
 const fetcher = (url) => api.get(url).then((res) => res.data);
 
@@ -161,7 +165,7 @@ export default function Kelas() {
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
                     <Link
-                      to={`/edit/${data.id}`}
+                      to={`/kelas/edit/${data.id}`}
                       className="text-blue-500 hover:text-blue-700 p-2 rounded transition-colors"
                       title="Edit"
                     >
@@ -182,61 +186,59 @@ export default function Kelas() {
         </Table>
       </Card>
 
-      {/* Modal Preview Sertifikat */}
-      {previewFile && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] flex flex-col">
-            {/* Header Modal */}
-            <div className="flex justify-between items-center p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">Preview Sertifikat</h3>
-              <button
-                onClick={() => setPreviewFile(null)}
-                className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition"
-                aria-label="Tutup"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+      {/* Modal Preview Sertifikat */}      
+{previewFile && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] flex flex-col">
+      {/* Header Modal */}
+      <div className="flex justify-between items-center p-4 border-b border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-800">Preview Sertifikat</h3>
+        <button
+          onClick={() => setPreviewFile(null)}
+          className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition"
+          aria-label="Tutup"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
-            {/* Body Modal - Preview File */}
-            <div className="flex-1 p-4">
-              <iframe
-                src={previewFile}
-                className="w-full h-full min-h-[500px] border rounded-lg"
-                title="Preview Sertifikat"
-                onError={(e) => {
-                  console.error("Gagal memuat file:", e);
-                  alert("Gagal memuat file. Pastikan file ada dan format didukung.");
-                }}
-              />
-            </div>
-
-            {/* Footer Modal */}
-            <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-              <div className="flex justify-end space-x-3">
-                <a
-                  href={previewFile}
-                  download
-                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Download
-                </a>
-                <button
-                  onClick={() => setPreviewFile(null)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-400 transition"
-                >
-                  Tutup
-                </button>
-              </div>
-            </div>
-          </div>
+      {/* Body Modal - Preview File */}
+      <div className="flex-1 p-4">
+        {/* ✅ Ganti iframe dengan React PDF Viewer */}
+        <div className="w-full h-full border rounded-lg overflow-hidden">
+          <Viewer
+            fileUrl={previewFile}
+            plugins={[defaultLayoutPlugin()]}
+          />
         </div>
-      )}
+      </div>
+
+      {/* Footer Modal */}
+      <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+        <div className="flex justify-end space-x-3">
+          <a
+            href={previewFile}
+            download
+            className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download
+          </a>
+          <button
+            onClick={() => setPreviewFile(null)}
+            className="px-4 py-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-400 transition"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

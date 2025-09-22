@@ -19,12 +19,7 @@ const KATEGORI_KELAS = [
 ];
 
 export default function Modul() {
-  const {
-    data: modulList = [],
-    error,
-    isLoading,
-    mutate,
-  } = useSWR("/modul", fetcher);
+  const { data: modulList = [], error, isLoading, mutate } = useSWR("/modul", fetcher);
 
   const [selectedKelas, setSelectedKelas] = useState("all");
   const [previewFile, setPreviewFile] = useState(null); // State untuk modal
@@ -60,9 +55,7 @@ export default function Modul() {
   if (error)
     return (
       <div className="p-6">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          Gagal memuat data: {error.message}
-        </div>
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">Gagal memuat data: {error.message}</div>
       </div>
     );
   if (isLoading)
@@ -84,11 +77,7 @@ export default function Modul() {
             <button
               key={kategori.id}
               onClick={() => setSelectedKelas(kategori.id)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                selectedKelas === kategori.id
-                  ? "bg-blue-600 text-white shadow-md"
-                  : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${selectedKelas === kategori.id ? "bg-blue-600 text-white shadow-md" : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"}`}
             >
               {kategori.nama}
             </button>
@@ -99,13 +88,9 @@ export default function Modul() {
       <Card>
         {/* Header Tabel */}
         <div className="flex justify-between items-center mb-6">
-          <span className="text-sm text-gray-500">
-            Menampilkan {filteredData.length} modul
-          </span>
+          <span className="text-sm text-gray-500">Menampilkan {filteredData.length} modul</span>
           <Link to="/tambahmodul">
-            <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors shadow-sm">
-              + Tambah Modul
-            </button>
+            <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors shadow-sm">+ Tambah Modul</button>
           </Link>
         </div>
 
@@ -135,15 +120,12 @@ export default function Modul() {
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">{index + 1}</td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{data.judul}</td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.deskripsi}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.namaKelas }</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.createdAt }</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.namaKelas}</td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.createdAt}</td>
                   {/* <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.dokumen}</td> */}
                   <td className="px-4 py-4 whitespace-nowrap text-sm">
                     {data.dokumen ? (
-                      <button
-                        onClick={() => handlePreview(data.dokumen)}
-                        className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 transition"
-                      >
+                      <button onClick={() => handlePreview(data.dokumen)} className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 transition">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -155,18 +137,10 @@ export default function Modul() {
                     )}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
-                    <Link
-                      to={`/editmodul/${data.id}`}
-                      className="text-blue-500 hover:text-blue-700 p-2 rounded transition-colors"
-                      title="Edit"
-                    >
+                    <Link to={`/modul/edit/${data.id}`} className="text-blue-500 hover:text-blue-700 p-2 rounded transition-colors" title="Edit">
                       <PencilSquareIcon className="h-5 w-5 inline" />
                     </Link>
-                    <button
-                      onClick={() => handleDelete(data.id)}
-                      className="text-red-500 hover:text-red-700 p-2 rounded transition-colors"
-                      title="Hapus"
-                    >
+                    <button onClick={() => handleDelete(data.id)} className="text-red-500 hover:text-red-700 p-2 rounded transition-colors" title="Hapus">
                       <TrashIcon className="h-5 w-5 inline" />
                     </button>
                   </td>
@@ -184,11 +158,7 @@ export default function Modul() {
             {/* Header Modal */}
             <div className="flex justify-between items-center p-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800">Preview Sertifikat</h3>
-              <button
-                onClick={() => setPreviewFile(null)}
-                className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition"
-                aria-label="Tutup"
-              >
+              <button onClick={() => setPreviewFile(null)} className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition" aria-label="Tutup">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -211,20 +181,13 @@ export default function Modul() {
             {/* Footer Modal */}
             <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
               <div className="flex justify-end space-x-3">
-                <a
-                  href={previewFile}
-                  download
-                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition"
-                >
+                <a href={previewFile} download className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition">
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   Download
                 </a>
-                <button
-                  onClick={() => setPreviewFile(null)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-400 transition"
-                >
+                <button onClick={() => setPreviewFile(null)} className="px-4 py-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-400 transition">
                   Tutup
                 </button>
               </div>

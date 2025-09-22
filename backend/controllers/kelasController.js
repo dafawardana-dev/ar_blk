@@ -60,31 +60,51 @@ export const createKelas = async (req, res) => {
 };
 
 // PUT update kelas
+// src/controllers/kelasController.js
 export const updateKelas = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nama, email, noHp, jk, tempatOjt, namaKelas, sertifikat } = req.body;
+    const { nama, email, noHp, jk, tempatOjt, namaKelas } = req.body;
+
+    // Ambil data lama
+    const kelasLama = await prisma.dataKelas.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!kelasLama) {
+      return res.status(404).json({ message: "Data kelas tidak ditemukan" });
+    }
+
+    // Handle file upload
+    let sertifikatPath = kelasLama.sertifikat; // Pertahankan jika tidak ada file baru
+    if (req.file) {
+      sertifikatPath = `/uploads/${req.file.filename}`;
+    }
+
     const updatedKelas = await prisma.dataKelas.update({
       where: { id: parseInt(id) },
-      data: {
+       data : {
+
         nama,
         email,
         noHp,
         jk,
         tempatOjt,
         namaKelas,
-        sertifikat,
+        sertifikat: sertifikatPath,
       },
     });
     res.status(200).json(updatedKelas);
   } catch (error) {
-    if (error.code === "P2025") {
-      res.status(404).json({ message: "Data kelas tidak ditemukan" });
-    } else if (error.code === "P2002") {
-      res.status(400).json({ message: "Email sudah terdaftar" });
-    } else {
-      res.status(500).json({ error: error.message });
+    console.error("❌ ERROR UPDATE KELAS:", error); // ✅ LOG INI WAJIB!
+
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Data kelas tidak ditemukan' });
+    } else if (error.code === 'P2002') {
+      return res.status(400).json({ error: 'Email sudah terdaftar' });
     }
+
+    res.status(500).json({ error: 'Terjadi kesalahan di server' });
   }
 };
 

@@ -7,16 +7,15 @@ import {
   createModul,
   updateModul,
   deleteModul,
-  fileUpload,
 } from '../controllers/modulController.js';
 
 const router = express.Router();
 
-router.post('/', upload.single('dokumen'), createModul); 
+router.post('/', upload.single('dokumen'), createModul);
+router.put('/:id', upload.single('dokumen'), updateModul);
+
 router.get('/', getAllModul);
 router.get('/:id', getModulById);
-// router.post('/', createModul);
-router.put('/:id', updateModul);
 router.delete('/:id', deleteModul);
 
 export default router;

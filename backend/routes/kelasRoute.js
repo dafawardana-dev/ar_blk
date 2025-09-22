@@ -11,10 +11,10 @@ import {
 
 const router = express.Router();
 
-router.post('/', upload.single('sertifikat'), createKelas); 
+router.post('/', upload.single('sertifikat'), createKelas);
+router.put('/:id', upload.single('sertifikat'), updateKelas);
 router.get('/', getAllKelas);
 router.get('/:id', getKelasById);
-router.put('/:id', updateKelas);
 router.delete('/:id', deleteKelas);
 
 export default router;

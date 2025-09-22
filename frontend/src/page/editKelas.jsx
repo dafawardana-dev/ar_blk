@@ -1,5 +1,4 @@
-// src/pages/EditKelas.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 import Card from "../components/ui/card.jsx";
@@ -7,7 +6,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 
 export default function EditKelas() {
   const navigate = useNavigate();
-  const { id } = useParams(); // Ambil ID dari URL: /edit/:id
+  const { id } = useParams();
 
   const [formData, setFormData] = useState({
     nama: "",
@@ -19,32 +18,39 @@ export default function EditKelas() {
   });
 
   const [selectedFile, setSelectedFile] = useState(null);
-  const [currentSertifikat, setCurrentSertifikat] = useState(null); // Untuk menampilkan file lama
+  const [currentSertifikat, setCurrentSertifikat] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isLoadingData, setIsLoadingData] = useState(true); // ✅ Loading state untuk fetch data
 
-  // Fetch data peserta saat komponen mount
+  // Fetch data peserta
   useEffect(() => {
     const fetchPeserta = async () => {
+      setIsLoadingData(true);
+      setError("");
       try {
         const response = await api.get(`/kelas/${id}`);
         const peserta = response.data;
         setFormData({
-          nama: peserta.nama,
-          email: peserta.email,
-          noHp: peserta.noHp,
-          jk: peserta.jk,
+          nama: peserta.nama || "",
+          email: peserta.email || "",
+          noHp: peserta.noHp || "",
+          jk: peserta.jk || "LAKI",
           tempatOjt: peserta.tempatOjt || "",
-          namaKelas: peserta.namaKelas,
+          namaKelas: peserta.namaKelas || "",
         });
-        setCurrentSertifikat(peserta.sertifikat); // Simpan URL sertifikat lama
+        setCurrentSertifikat(peserta.sertifikat || null);
       } catch (err) {
         console.error("Gagal mengambil data peserta:", err);
         setError("Gagal memuat data peserta. Silakan coba lagi.");
+      } finally {
+        setIsLoadingData(false);
       }
     };
 
-    fetchPeserta();
+    if (id) {
+      fetchPeserta();
+    }
   }, [id]);
 
   const handleChange = (e) => {
@@ -57,39 +63,71 @@ export default function EditKelas() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+  e.preventDefault();
+  setLoading(true);
+  setError("");
 
-    const formDataToSend = new FormData();
-    formDataToSend.append('nama', formData.nama);
-    formDataToSend.append('email', formData.email);
-    formDataToSend.append('noHp', formData.noHp);
-    formDataToSend.append('jk', formData.jk);
-    formDataToSend.append('tempatOjt', formData.tempatOjt);
-    formDataToSend.append('namaKelas', formData.namaKelas);
+  const formDataToSend = new FormData();
+  formDataToSend.append('nama', formData.nama);
+  formDataToSend.append('email', formData.email);
+  formDataToSend.append('noHp', formData.noHp);
+  formDataToSend.append('jk', formData.jk);
+  formDataToSend.append('tempatOjt', formData.tempatOjt);
+  formDataToSend.append('namaKelas', formData.namaKelas);
 
-    // Hanya tambahkan file jika ada file baru yang dipilih
-    if (selectedFile) {
-      formDataToSend.append('sertifikat', selectedFile);
-    }
+  if (selectedFile) {
+    formDataToSend.append('sertifikat', selectedFile);
+  }
 
-    try {
-      await api.put(`/kelas/${id}`, formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      navigate("/kelas", { 
-        state: { message: "Data peserta berhasil diperbarui!" } 
-      });
-    } catch (err) {
-      console.error("Full error:", err);
-      setError(err.response?.data?.error || "Gagal memperbarui peserta. Silakan coba lagi.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  
+  for (let [key, value] of formDataToSend.entries()) {
+    console.log(key, value);
+  }
+
+  try {
+    await api.put(`/kelas/${id}`, formDataToSend, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    navigate("/kelas", { 
+      state: { message: "Data peserta berhasil diperbarui!" } 
+    });
+  } catch (err) {
+    console.error("Full error:", err);
+    setError(
+      err.response?.data?.error || 
+      "Gagal memperbarui peserta. Silakan coba lagi."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+ 
+  if (isLoadingData) {
+    return (
+      <div className="p-6 flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  
+  if (error && !formData.nama) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+        <button
+          onClick={() => navigate("/kelas")}
+          className="mt-4 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+        >
+          Kembali ke Daftar Kelas
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -111,7 +149,8 @@ export default function EditKelas() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* ✅ Gunakan key={id} untuk memaksa re-render saat ID berubah */}
+        <form key={id} onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -213,15 +252,15 @@ export default function EditKelas() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                Lihat Sertifikat Saat Ini
+                Lihat Sertifikat
               </a>
             </div>
           )}
 
-          {/* Upload File Baru (Opsional) */}
+          {/* Upload File Baru */}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {currentSertifikat ? "Ganti Sertifikat (Opsional)" : "Upload Sertifikat (PDF, DOC, DOCX, maks 10MB)"}
+              {currentSertifikat ? "Ganti Sertifikat (Opsional)" : "Upload Sertifikat (PDF, DOC, DOCX)"}
             </label>
             <input
               type="file"

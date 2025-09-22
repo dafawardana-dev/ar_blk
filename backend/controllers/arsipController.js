@@ -27,34 +27,60 @@ export const getArsipById = async (req, res) => {
 };
 
 export const createArsip = async (req, res) => {
-  const { nomor, judul, deskripsi, tglSurat, pengirim, penerima } = req.body;
-
-   let  dokumenArsip = null;
-    if (req.file) {
-       dokumenArsip = `/uploads/${req.file.filename}`; 
-    }
   try {
+    const { nomor, judul, deskripsi, tglSurat, pengirim, penerima } = req.body;
+    
+    if (!tglSurat) {
+      return res.status(400).json({ error: "Tanggal Surat wajib diisi" });
+    }
+
+    const tanggalSurat = new Date(tglSurat);
+    if (isNaN(tanggalSurat.getTime())) {
+      return res.status(400).json({ error: "Format tanggal tidak valid" });
+    }
+
+    let dokumenPath = null;
+    if (req.file) {
+      dokumenPath = `/uploads/${req.file.filename}`;
+    }
+
     const newArsip = await prisma.dataArsip.create({
-      data: {
+       data :{
         nomor,
         judul,
         deskripsi,
-        tglSurat,
+        tglSurat: tanggalSurat,
         pengirim,
         penerima,
-        dokumen : dokumenArsip,
+        dokumen: dokumenPath,
       },
     });
+
     res.status(201).json(newArsip);
   } catch (error) {
+    console.error("❌ Error creating arsip:", error); 
     res.status(500).json({ error: error.message });
   }
 };
 
 export const updateArsip = async (req, res) => {
-  const { id } = req.params;
-  const { nomor, judul, deskripsi, tglSurat, pengirim, penerima, dokumen } = req.body;
   try {
+    const { id } = req.params;
+    const { nomor, judul, deskripsi, tglSurat, pengirim, penerima, dokumen } = req.body;
+
+    const arsipLama = await prisma.dataArsip.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+     if (!arsipLama) {
+      return res.status(404).json({ message: "Data kelas tidak ditemukan" });
+    }
+
+    let dokumenPath = arsipLama.dokumen; // Pertahankan dokumen lama
+    if (req.file) {
+      dokumenPath = `/uploads/${req.file.filename}`;
+    }
+
     const updatedArsip = await prisma.dataArsip.update({
       where: { id: parseInt(id) },
       data: {

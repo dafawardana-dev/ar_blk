@@ -59,13 +59,12 @@ export const createModul = async (req, res) => {
   }
 };
 
-// PUT update modul
 export const updateModul = async (req, res) => {
   try {
     const { id } = req.params;
     const { judul, deskripsi, namaKelas } = req.body;
 
-    // Ambil data lama untuk handle file
+    // Ambil data lama
     const modulLama = await prisma.dataModul.findUnique({
       where: { id: parseInt(id) },
     });
@@ -74,30 +73,26 @@ export const updateModul = async (req, res) => {
       return res.status(404).json({ message: "Data modul tidak ditemukan" });
     }
 
-    // Handle file upload (ganti dokumen jika ada file baru)
-    let dokumenPath = modulLama.dokumen; // Pertahankan dokumen lama jika tidak ada yang baru
+    // Handle file upload
+    let dokumenPath = modulLama.dokumen; // Pertahankan dokumen lama
     if (req.file) {
       dokumenPath = `/uploads/${req.file.filename}`;
     }
 
     const updatedModul = await prisma.dataModul.update({
       where: { id: parseInt(id) },
-      data: {
+       data :{
         judul,
         deskripsi,
         namaKelas,
         dokumen: dokumenPath,
-      }
+      },
     });
 
     res.status(200).json(updatedModul);
   } catch (error) {
-    console.error("Error updating modul:", error);
-    if (error.code === "P2025") {
-      res.status(404).json({ message: "Data modul tidak ditemukan" });
-    } else {
-      res.status(500).json({ error: error.message });
-    }
+    console.error("❌ ERROR UPDATE MODUL:", error); 
+    res.status(500).json({ error: error.message });
   }
 };
 

@@ -1,178 +1,271 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-
-const API_BASE_URL = 'http://localhost:5000/api/arsip';
+// src/pages/EditArsip.jsx
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import api from "../services/api";
+import Card from "../components/ui/card.jsx";
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 
 export default function EditArsip() {
-  const { id } = useParams();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    nomor: '',
-    judul: '',
-    deskripsi: '',
-    tglSurat: '',
-    pengirim: '',
-    penerima: '',
-    dokumen: ''
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { id } = useParams();
 
-  // Fetch arsip data by id
+  const [formData, setFormData] = useState({
+    nomor: "",
+    judul: "",
+    deskripsi: "",
+    pengirim: "",
+    penerima: "",
+    tglSurat: "",
+  });
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [currentDokumen, setCurrentDokumen] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   useEffect(() => {
     const fetchArsip = async () => {
-      setLoading(true);
       try {
-        const response = await fetch(`${API_BASE_URL}/${id}`);
-        if (!response.ok) throw new Error('Failed to fetch arsip data');
-        const data = await response.json();
+        const response = await api.get(`/arsip/${id}`);
+        const arsip = response.data;
         setFormData({
-          nomor: data.nomor,
-          judul: data.judul,
-          deskripsi: data.deskripsi,
-          tglSurat: data.tglSurat ? data.tglSurat.split('T')[0] : '',
-          pengirim: data.pengirim,
-          penerima: data.penerima,
-          dokumen: data.dokumen
+          nomor: arsip.nomor,
+          judul: arsip.judul,
+          deskripsi: arsip.deskripsi, // ✅ Akan otomatis memilih opsi yang sesuai
+          pengirim: arsip.pengirim,
+          penerima: arsip.penerima,
+          tglSurat: arsip.tglSurat.split('T')[0], // ✅ Format YYYY-MM-DD untuk input date
         });
-        setError(null);
+        setCurrentDokumen(arsip.dokumen);
       } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+        console.error("Gagal mengambil data arsip:", err);
+        setError("Gagal memuat data arsip. Silakan coba lagi.");
       }
     };
+
     fetchArsip();
   }, [id]);
 
-  // Handle form input change
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle form submit
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("nomor", formData.nomor);
+    formDataToSend.append("judul", formData.judul);
+    formDataToSend.append("deskripsi", formData.deskripsi);
+    formDataToSend.append("pengirim", formData.pengirim);
+    formDataToSend.append("penerima", formData.penerima);
+    formDataToSend.append("tglSurat", formData.tglSurat);
+
+    if (selectedFile) {
+      formDataToSend.append("dokumen", selectedFile);
+    }
+
     try {
-      const response = await fetch(`${API_BASE_URL}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+      await api.put(`/arsip/${id}`, formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
-      if (!response.ok) throw new Error('Failed to update arsip');
-      setError(null);
-      navigate('/arsip');
+      navigate("/arsip", {
+        state: { message: "Dokumen berhasil diperbarui!" },
+      });
     } catch (err) {
-      setError(err.message);
+      console.error("Full error:", err);
+      setError(err.response?.data?.error || "Gagal memperbarui dokumen. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-4 ml-60 pt-20">
-      <h1 className="text-2xl font-bold mb-4">Edit Arsip</h1>
+    <div className="p-6">
+      <div className="flex items-center mb-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-blue-600 hover:text-blue-800 mr-4"
+        >
+          <ArrowLeftIcon className="h-5 w-5 mr-1" />
+          Kembali
+        </button>
+        <h1 className="text-2xl font-bold text-gray-800">Edit Arsip Dokumen</h1>
+      </div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
+      <Card>
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded border border-red-300">
+            {error}
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Nomor</label>
-            <input
-              type="text"
-              name="nomor"
-              value={formData.nomor}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded"
-              required
-            />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nomor Surat <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="nomor"
+                value={formData.nomor}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Judul Dokumen <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="judul"
+                value={formData.judul}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Jenis Dokumen <span className="text-red-500">*</span>
+              </label>
+              <select
+                name="deskripsi"
+                value={formData.deskripsi}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Pilih Jenis Dokumen</option>
+                <option value="Arsip Dokumen OJT">Arsip Dokumen OJT</option>
+                <option value="Surat Masuk">Surat Masuk</option>
+                <option value="Surat Keluar">Surat Keluar</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tanggal Surat <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                name="tglSurat"
+                value={formData.tglSurat}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Pengirim Surat <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="pengirim"
+                value={formData.pengirim}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Penerima Surat <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="penerima"
+                value={formData.penerima}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Judul</label>
-            <input
-              type="text"
-              name="judul"
-              value={formData.judul}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
+
+          {/* Tampilkan Dokumen Saat Ini */}
+          {currentDokumen && (
+            <div className="md:col-span-2 p-4 bg-gray-50 rounded-md">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Dokumen Saat Ini</h3>
+              <a
+                href={currentDokumen}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline flex items-center"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                Lihat Dokumen Saat Ini
+              </a>
+            </div>
+          )}
+
+          {/* Upload File Baru (Opsional) */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1">Deskripsi</label>
-            <textarea
-              name="deskripsi"
-              value={formData.deskripsi}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded"
-              rows="3"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Tanggal Surat</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {currentDokumen ? "Ganti Dokumen (Opsional)" : "Upload Dokumen (PDF, DOC, DOCX, maks 10MB)"}
+            </label>
             <input
-              type="date"
-              name="tglSurat"
-              value={formData.tglSurat}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Pengirim</label>
-            <input
-              type="text"
-              name="pengirim"
-              value={formData.pengirim}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Penerima</label>
-            <input
-              type="text"
-              name="penerima"
-              value={formData.penerima}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Dokumen</label>
-            <input
-              type="text"
+              type="file"
               name="dokumen"
-              value={formData.dokumen}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded"
+              accept=".pdf,.doc,.docx"
+              onChange={handleFileChange}
+              className="block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-md file:border-0
+                file:text-sm file:font-semibold
+                file:bg-blue-50 file:text-blue-700
+                hover:file:bg-blue-100"
             />
+            {selectedFile && (
+              <p className="mt-1 text-sm text-gray-500">
+                File baru: <span className="font-medium">{selectedFile.name}</span>
+              </p>
+            )}
           </div>
-        </div>
-        <div className="mt-4 flex gap-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blue1 text-white px-4 py-2 rounded cursor-pointer"
-          >
-            {loading ? 'Menyimpan...' : 'Update'}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/arsip')}
-            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-          >
-            Batal
-          </button>
-        </div>
-      </form>
+
+          <div className="flex justify-end space-x-4 pt-4">
+            <button
+              type="button"
+              onClick={() => navigate("/arsip")}
+              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center"
+            >
+              {loading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Menyimpan...
+                </>
+              ) : (
+                "Simpan Perubahan"
+              )}
+            </button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 }
