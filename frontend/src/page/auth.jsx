@@ -212,4 +212,6 @@ export default function Login({ setToken }) {
       </div>
     </div>
   );
+  }
 }
+
