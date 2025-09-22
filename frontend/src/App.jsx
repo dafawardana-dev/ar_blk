@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom
 import Sidebar from './components/layouts/sidebar.jsx';
 import Navbar from './components/layouts/navbar.jsx';
 import Dashboard from './page/dashboard.jsx';
+// import TesDownload from './page/tesdownload.jsx';
 import AuthPage from './page/auth.jsx';
 import KelasPage from './page/kelas.jsx';
 import AddKelasPage from './page/tambahKelas.jsx';
@@ -30,6 +31,11 @@ function DashboardLayout() {
 }
 
 function App() {
+  const [token, setToken] = useState();
+  
+    if (!token) {
+      return <Login setToken={setToken} />
+    }
   return (
     <Router>
       <Routes>
@@ -38,6 +44,7 @@ function App() {
 
         {/* Route yang memerlukan Layout Dashboard */}
         <Route path="/" element={<DashboardLayout />}>
+          {/* <Route path="tesdownload" element={<TesDownload />} /> */}
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="kelas" element={<KelasPage />} />
           <Route path="modul" element={<ModulPage />} />

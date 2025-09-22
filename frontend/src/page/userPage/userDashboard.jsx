@@ -1,6 +1,6 @@
 // src/pages/Dashboard.jsx
 import { useState, useEffect } from "react";
-import api from "../services/api";
+import api from "../../services/api";
 import {
   ArchiveBoxIcon,
   AcademicCapIcon,

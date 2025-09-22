@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LgWhite from "../assets/lgWhite.png";
+import PropTypes from "prop-types";
 
-export default function Login() {
+export default function Login({ setToken }) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -27,6 +28,35 @@ export default function Login() {
       setRegisterEmail("");
       setRegisterPassword("");
     }
+  };
+  async function login(credentials) {
+    return fetch("http://localhost:5000/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(credentials),
+    })
+      .then((data) => data.json())
+  }
+
+  export default function Login({ setToken }) {
+
+    const [username, setLoginUsername] = useState();
+    const [password, setLoginPassword] = useState();
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      const token = await login({
+        username,
+        password,
+      });
+      setToken(token);
+    }
+
+  
+  Login.propTypes = {
+    setToken: PropTypes.func.isRequired,
   };
 
   return (
@@ -115,8 +145,8 @@ export default function Login() {
           )}
         </div>
 
-      {/* Form Register di sisi kanan */}
-          {isRegistering && (
+        {/* Form Register di sisi kanan */}
+        {isRegistering && (
           <div className="absolute right-0 w-1/2 h-full bg-white p-8 flex flex-col justify-center items-center shadow-lg">
             <div className="max-w-md w-full space-y-8">
               <div className="text-center">
@@ -125,60 +155,60 @@ export default function Login() {
                 </h2>
               </div>
               <form className="mt-8 space-y-6" onSubmit={handleRegister}>
-              <div className="rounded-md shadow-sm -space-y-px">
-                <div>
-                  <label htmlFor="register-username" className="sr-only">
-                    Username
-                  </label>
-                  <input
-                    id="register-username"
-                    type="text"
-                    placeholder="Username"
-                    value={registerUsername}
-                    onChange={(e) => setRegisterUsername(e.target.value)}
-                    required
-                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-blue1 placeholder-blue1 text-blue1 rounded-t-md focus:outline-none focus:ring-blue1 focus:border-blue1 focus:z-10 sm:text-sm"
-                  />
+                <div className="rounded-md shadow-sm -space-y-px">
+                  <div>
+                    <label htmlFor="register-username" className="sr-only">
+                      Username
+                    </label>
+                    <input
+                      id="register-username"
+                      type="text"
+                      placeholder="Username"
+                      value={registerUsername}
+                      onChange={(e) => setRegisterUsername(e.target.value)}
+                      required
+                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-blue1 placeholder-blue1 text-blue1 rounded-t-md focus:outline-none focus:ring-blue1 focus:border-blue1 focus:z-10 sm:text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="register-email" className="sr-only">
+                      Email
+                    </label>
+                    <input
+                      id="register-email"
+                      type="email"
+                      placeholder="Email"
+                      value={registerEmail}
+                      onChange={(e) => setRegisterEmail(e.target.value)}
+                      required
+                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-blue1 placeholder-blue1 text-blue1 focus:outline-none focus:ring-blue1 focus:border-blue1 focus:z-10 sm:text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="register-password" className="sr-only">
+                      Password
+                    </label>
+                    <input
+                      id="register-password"
+                      type="password"
+                      placeholder="Password"
+                      value={registerPassword}
+                      onChange={(e) => setRegisterPassword(e.target.value)}
+                      required
+                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-blue1 placeholder-blue1 text-blue1 rounded-b-md focus:outline-none focus:ring-blue1 focus:border-blue1 focus:z-10 sm:text-sm"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label htmlFor="register-email" className="sr-only">
-                    Email
-                  </label>
-                  <input
-                    id="register-email"
-                    type="email"
-                    placeholder="Email"
-                    value={registerEmail}
-                    onChange={(e) => setRegisterEmail(e.target.value)}
-                    required
-                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-blue1 placeholder-blue1 text-blue1 focus:outline-none focus:ring-blue1 focus:border-blue1 focus:z-10 sm:text-sm"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="register-password" className="sr-only">
-                    Password
-                  </label>
-                  <input
-                    id="register-password"
-                    type="password"
-                    placeholder="Password"
-                    value={registerPassword}
-                    onChange={(e) => setRegisterPassword(e.target.value)}
-                    required
-                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-blue1 placeholder-blue1 text-blue1 rounded-b-md focus:outline-none focus:ring-blue1 focus:border-blue1 focus:z-10 sm:text-sm"
-                  />
-                </div>
-              </div>
-              <button
-                type="submit"
-                className="w-full py-2 px-4 bg-blue1 text-white rounded-md hover:bg-blue1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue1"
-              >
-                Register
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  className="w-full py-2 px-4 bg-blue1 text-white rounded-md hover:bg-blue1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue1"
+                >
+                  Register
+                </button>
+              </form>
             </div>
           </div>
-          )}
+        )}
       </div>
     </div>
   );

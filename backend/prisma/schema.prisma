@@ -32,6 +32,19 @@ enum JenisKelamin {
   PEREMPUAN
 }
 
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  namaKelas String?
+  password  String
+  role      String
+  name      String
+  }
+
+enum Role {
+  ADMIN
+  USER
+}
 
 model dataModul {
   id         Int      @id @default(autoincrement())

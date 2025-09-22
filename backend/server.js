@@ -5,7 +5,6 @@ import { PrismaClient } from '@prisma/client';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-
 import arsipRoute from './routes/arsipRoute.js';
 import kelasRoute from './routes/kelasRoute.js';
 import modulRoute from './routes/modulRoute.js';
@@ -24,14 +23,21 @@ app.use('/uploads', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header('Access-Control-Expose-Headers', 'Content-Length, Content-Disposition');
   next();
 });
 
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/arsip', arsipRoute);
 app.use('/api/kelas', kelasRoute);
 app.use('/api/modul', modulRoute);
+
+app.use('/login', (req, res) => {
+  res.send({
+    token: 'test'
+  })
+});
 
 app.get('/', (req, res) => {
   res.json({ 

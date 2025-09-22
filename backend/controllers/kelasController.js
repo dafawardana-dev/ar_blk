@@ -133,9 +133,9 @@ export const fileUpload = async (req, res) => {
     });
   }
   const fileSertif = file.filename;
-  const pathFile = `/middleware/uploads/${fileSertif}`;
+  const pathFile = `/uploads/${fileSertif}`;
   res.status(200).json({
-    message: "File Sucsess Uploaded",
+    message: "File Successfully Uploaded",
     file: pathFile,
   });
 };

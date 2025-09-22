@@ -17,4 +17,5 @@ router.get('/', getAllKelas);
 router.get('/:id', getKelasById);
 router.delete('/:id', deleteKelas);
 
+
 export default router;
