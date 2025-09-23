@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import Card from "../components/ui/card.jsx";
+import Card from "../components/ui/Card.jsx";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 
 export default function TambahArsip() {
@@ -72,7 +72,7 @@ export default function TambahArsip() {
           <ArrowLeftIcon className="h-5 w-5 mr-1" />
           Kembali
         </button>
-        <h1 className="text-2xl font-bold text-gray-800">Tambah Arsip Dokumen</h1>
+
       </div>
 
       <Card>

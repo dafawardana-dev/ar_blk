@@ -1,21 +1,25 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContexts.jsx";
 import LgWhite from "../assets/lgWhite.png";
-import PropTypes from "prop-types";
 
-export default function Login({ setToken }) {
+export default function Login() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [registerUsername, setRegisterUsername] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
+  const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (loginUsername && loginPassword) {
-      navigate("/dashboard");
+      const success = await login(loginUsername, loginPassword); // Ubah login() untuk mengembalikan boolean
+      if (success) {
+        navigate(success.role === "admin" ? "/dashboard" : "/user-dashboard");
+      }
     }
   };
 
@@ -29,35 +33,6 @@ export default function Login({ setToken }) {
       setRegisterPassword("");
     }
   };
-  async function login(credentials) {
-    return fetch("http://localhost:5000/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(credentials),
-    })
-      .then((data) => data.json())
-  }
-
-  export default function Login({ setToken }) {
-
-    const [username, setLoginUsername] = useState();
-    const [password, setLoginPassword] = useState();
-
-    async function handleSubmit(e) {
-      e.preventDefault();
-      const token = await login({
-        username,
-        password,
-      });
-      setToken(token);
-    }
-
-  
-  Login.propTypes = {
-    setToken: PropTypes.func.isRequired,
-  };
 
   return (
     <div className="relative flex min-h-screen overflow-hidden">
@@ -65,12 +40,8 @@ export default function Login({ setToken }) {
       <div className="w-1/2 flex flex-col justify-center items-center bg-white p-8">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
-            <h2 className="mt-6 text-3xl font-extrabold text-blue1">
-              Masuk ke Akun Anda
-            </h2>
-            <p className="mt-2 text-sm text-blue1">
-              Silakan masukkan username dan password Anda
-            </p>
+            <h2 className="mt-6 text-3xl font-extrabold text-blue1">Masuk ke Akun Anda</h2>
+            <p className="mt-2 text-sm text-blue1">Silakan masukkan username dan password Anda</p>
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleLogin}>
             <div className="rounded-md shadow-sm -space-y-px">
@@ -106,10 +77,7 @@ export default function Login({ setToken }) {
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-2 px-4 text-white bg-blue1 hover:bg-blue1 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue1"
-            >
+            <button type="submit" className="w-full py-2 px-4 text-white bg-blue1 hover:bg-blue1 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue1">
               Masuk
             </button>
           </form>
@@ -117,11 +85,7 @@ export default function Login({ setToken }) {
       </div>
 
       {/* Panel Kuning yang Bergeser */}
-      <div
-        className={`absolute top-0 right-0 h-full w-full bg-blue1 transition-transform duration-700 ease-in-out ${
-          isRegistering ? "translate-x-0" : "translate-x-1/2"
-        } flex flex-col justify-center items-center`}
-      >
+      <div className={`absolute top-0 right-0 h-full w-full bg-blue1 transition-transform duration-700 ease-in-out ${isRegistering ? "translate-x-0" : "translate-x-1/2"} flex flex-col justify-center items-center`}>
         {/* Bagian Logo + Tombol */}
         <div className="absolute left-1/4 transform -translate-x-1/2 flex flex-col items-center space-y-4">
           {/* Logo di atas tombol */}
@@ -129,17 +93,11 @@ export default function Login({ setToken }) {
 
           {/* Tombol Register atau Login */}
           {!isRegistering ? (
-            <button
-              onClick={() => setIsRegistering(true)}
-              className="py-2 px-6 bg-white text-blue1 font-semibold rounded-md hover:bg-blue1 hover:text-white hover:outline-none hover:ring-2 hover:ring-white"
-            >
+            <button onClick={() => setIsRegistering(true)} className="py-2 px-6 bg-white text-blue1 font-semibold rounded-md hover:bg-blue1 hover:text-white hover:outline-none hover:ring-2 hover:ring-white">
               Register
             </button>
           ) : (
-            <button
-              onClick={() => setIsRegistering(false)}
-              className="py-2 px-6 bg-white text-blue1 font-semibold rounded-md hover:bg-blue1 hover:text-white hover:outline-none hover:ring-2 hover:ring-white"
-            >
+            <button onClick={() => setIsRegistering(false)} className="py-2 px-6 bg-white text-blue1 font-semibold rounded-md hover:bg-blue1 hover:text-white hover:outline-none hover:ring-2 hover:ring-white">
               Login
             </button>
           )}
@@ -150,9 +108,7 @@ export default function Login({ setToken }) {
           <div className="absolute right-0 w-1/2 h-full bg-white p-8 flex flex-col justify-center items-center shadow-lg">
             <div className="max-w-md w-full space-y-8">
               <div className="text-center">
-                <h2 className="text-3xl font-extrabold text-blue1">
-                  Buat Akun Baru
-                </h2>
+                <h2 className="text-3xl font-extrabold text-blue1">Buat Akun Baru</h2>
               </div>
               <form className="mt-8 space-y-6" onSubmit={handleRegister}>
                 <div className="rounded-md shadow-sm -space-y-px">
@@ -199,10 +155,7 @@ export default function Login({ setToken }) {
                     />
                   </div>
                 </div>
-                <button
-                  type="submit"
-                  className="w-full py-2 px-4 bg-blue1 text-white rounded-md hover:bg-blue1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue1"
-                >
+                <button type="submit" className="w-full py-2 px-4 bg-blue1 text-white rounded-md hover:bg-blue1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue1">
                   Register
                 </button>
               </form>
@@ -212,6 +165,4 @@ export default function Login({ setToken }) {
       </div>
     </div>
   );
-  }
 }
-

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import Card from "../components/ui/card.jsx";
+import Card from "../components/ui/Card.jsx";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 
 export default function TambahModul() {

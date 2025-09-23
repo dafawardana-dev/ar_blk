@@ -1,63 +1,136 @@
 // src/App.jsx
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
-import Sidebar from './components/layouts/sidebar.jsx';
-import Navbar from './components/layouts/navbar.jsx';
-import Dashboard from './page/dashboard.jsx';
-// import TesDownload from './page/tesdownload.jsx';
-import AuthPage from './page/auth.jsx';
-import KelasPage from './page/kelas.jsx';
-import AddKelasPage from './page/tambahKelas.jsx';
-import EditKelasPage from './page/editKelas.jsx';
-import EditModulPage from './page/editModul.jsx';
-import EditArsipPage from './page/EditArsip.jsx';
-import AddModulPage from './page/tambahModuls.jsx';
-import AddArsipPage from './page/AddArsip.jsx';
-import ModulPage from './page/modul.jsx';
-import ArsipPage from './page/arsip.jsx';
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "./contexts/AuthContexts.jsx"; 
+import Sidebar from "./components/layouts/sidebar.jsx";
+import Navbar from "./components/layouts/navbar.jsx";
+import DashboardAdmin from "./page/dashboard.jsx"; 
+import DashboardUser from "./userPage/userDashboard.jsx"; 
+import AuthPage from "./page/auth.jsx";
+import KelasPage from "./page/kelas.jsx";
+import AddKelasPage from "./page/tambahKelas.jsx";
+import EditKelasPage from "./page/editKelas.jsx";
+import EditModulPage from "./page/editModul.jsx";
+import EditArsipPage from "./page/EditArsip.jsx";
+import AddModulPage from "./page/tambahModuls.jsx";
+import AddArsipPage from "./page/AddArsip.jsx";
+import ModulPage from "./page/modul.jsx";
+import ArsipPage from "./page/arsip.jsx";
 
-// Komponen Layout untuk halaman yang memerlukan Sidebar + Navbar
 function DashboardLayout() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/" />;
+  }
+
+
+  const SidebarComponent = user.role === "admin" ? Sidebar : UserSidebar;
+
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
+      <SidebarComponent /> 
       <div className="flex-1 flex flex-col">
         <Navbar />
         <main className="flex-1 p-6">
-          <Outlet /> {/* Ini akan menampilkan komponen anak (Dashboard, Kelas, dll) */}
+          <Outlet /> {/* Tempat route anak dirender */}
         </main>
       </div>
     </div>
   );
 }
 
-function App() {
-  const [token, setToken] = useState();
-  
-    if (!token) {
-      return <Login setToken={setToken} />
-    }
-  return (
-    <Router>
-      <Routes>
-        {/* Route Publik (Tanpa Layout) */}
-        <Route path="/" element={<AuthPage />} />
+import UserSidebar from "./components/layouts/SidebarUser.jsx"; 
 
-        {/* Route yang memerlukan Layout Dashboard */}
-        <Route path="/" element={<DashboardLayout />}>
-          {/* <Route path="tesdownload" element={<TesDownload />} /> */}
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="kelas" element={<KelasPage />} />
-          <Route path="modul" element={<ModulPage />} />
-          <Route path="arsip" element={<ArsipPage />} />
-          <Route path="tambahkelas" element={<AddKelasPage />} />
-          <Route path="kelas/edit/:id" element={<EditKelasPage />} />
-          <Route path="modul/edit/:id" element={<EditModulPage />} />
-          <Route path="arsip/edit/:id" element={<EditArsipPage />} />
-          <Route path="tambaharsip" element={<AddArsipPage />} />
-          <Route path="tambahmodul" element={<AddModulPage />} />
-        </Route>
-      </Routes>
-    </Router>
+// Komponen Protected Route untuk Admin
+function AdminRoute({ children }) {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/" />;
+  }
+
+  if (user.role !== "admin") {
+    return <Navigate to="/user-dashboard" />;
+  }
+
+  return children;
+}
+
+function App() {
+  return (
+    <Routes>
+      {/* Route Publik */}
+      <Route path="/" element={<AuthPage />} />
+
+      <Route element={<DashboardLayout />}>
+        {/* Halaman yang bisa diakses user & admin */}
+        <Route
+          path="/dashboard"
+          element={
+            <AdminRoute>
+              <DashboardAdmin />
+            </AdminRoute>
+          }
+        />
+        <Route path="/user-dashboard" element={<DashboardUser />} />
+        <Route path="kelas" element={<KelasPage />} />
+        <Route path="modul" element={<ModulPage />} />
+        <Route path="arsip" element={<ArsipPage />} />
+
+        {/* Route CRUD — hanya untuk admin */}
+        <Route
+          path="tambahkelas"
+          element={
+            <AdminRoute>
+              <AddKelasPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="kelas/edit/:id"
+          element={
+            <AdminRoute>
+              <EditKelasPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="modul/edit/:id"
+          element={
+            <AdminRoute>
+              <EditModulPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="arsip/edit/:id"
+          element={
+            <AdminRoute>
+              <EditArsipPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="tambaharsip"
+          element={
+            <AdminRoute>
+              <AddArsipPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="tambahmodul"
+          element={
+            <AdminRoute>
+              <AddModulPage />
+            </AdminRoute>
+          }
+        />
+      </Route>
+
+      {/* Redirect default */}
+      <Route path="*" element={<Navigate to="/dashboard" />} />
+    </Routes>
   );
 }
 

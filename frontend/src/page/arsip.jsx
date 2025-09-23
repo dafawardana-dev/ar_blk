@@ -8,6 +8,7 @@ import { PencilSquareIcon, TrashIcon, EyeIcon, ArrowDownTrayIcon } from "@heroic
 import FilePreview from "reactjs-file-preview";
 import { saveAs } from "file-saver";
 import axios from "axios";
+import { useAuth } from "../contexts/AuthContexts.jsx";
 
 const fetcher = (url) => api.get(url).then((res) => res.data);
 
@@ -20,6 +21,7 @@ const KATEGORI_ARSIP = [
 
 ];
 export default function Arsip() {
+  const { user } = useAuth();
   const {
     data: arsipList = [],
     error,
@@ -160,8 +162,12 @@ export default function Arsip() {
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penerima</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Surat</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
+              {user.role === "user" && (
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dokumen</th>
+              )}
+              {user.role === "admin" && (
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -181,7 +187,7 @@ export default function Arsip() {
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.penerima || "-"}</td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.tglSurat}</td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">{data.deskripsi || "-"}</td>
-                 
+                 {user.role === "user" && (
                   <td className="px-4 py-4 whitespace-nowrap text-sm">
                     {data.dokumen ? (
                       <div className="flex items-center space-x-2">
@@ -205,6 +211,8 @@ export default function Arsip() {
                       <span className="text-gray-400 italic">Belum ada</span>
                     )}
                   </td>
+                 )}
+                 {user.role === "admin" && (
                   <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
                     <Link
                       to={`/arsip/edit/${data.id}`}
@@ -221,6 +229,7 @@ export default function Arsip() {
                       <TrashIcon className="h-5 w-5 inline" />
                     </button>
                   </td>
+                 )}
                 </tr>
               ))
             )}
