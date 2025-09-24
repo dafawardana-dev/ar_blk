@@ -2,6 +2,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import logo from "./../../assets/lgWhite.png";
+import { useAuth } from "../../contexts/AuthContexts.jsx";
+import { LogOut } from "lucide-react";
 import { 
   HomeIcon, 
   FolderIcon, 
@@ -10,6 +12,7 @@ import {
 } from '@heroicons/react/24/solid';
 // src/components/layouts/sidebar.jsx
 export default function Sidebar() {
+  const { logout } = useAuth();
   return (
     <div className="w-70 bg-[#154D71] text-gray-300 min-h-screen p-4">
       <div className="flex items-center mb-6">
@@ -60,6 +63,12 @@ export default function Sidebar() {
             </Link>
           </li>
         </ul>
+        <div className="px-4 py-4 ">
+        <button onClick={logout} className="flex items-center w-full px-4 py-2 rounded-md text-sm font-medium text-blue-200 hover:bg-red-500 hover:text-white transition-colors">
+          <LogOut className="h-5 w-5 mr-3" />
+          Logout
+        </button>
+      </div>
       </nav>
     </div>
   );

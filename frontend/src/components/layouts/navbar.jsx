@@ -1,15 +1,24 @@
 // src/components/layout/Navbar.jsx
-import { Link } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContexts"; // Sesuaikan path jika perlu
+
 export default function Navbar() {
+  const { user, loading } = useAuth();
+
   return (
     <header className="bg-[#1C6EA4] text-white p-4 shadow-md">
-
       <div className="flex justify-between items-center">
+        {/* Heading Aplikasi */}
         <h2 className="text-xl font-semibold">Sistem Arsip Dokumen BLK</h2>
-        <div className="flex items-center space-x-4">
-          <Link to="/"className="bg-[#FB4141] hover:bg-[#8C1007] px-3 py-1 rounded">
-            Logout
-          </Link>
+
+        {/* Tampilkan role/nama user yang sedang login */}
+        <div className="text-sm font-medium">
+          {loading ? (
+            "Memuat..."
+          ) : user ? (
+            user.role === "admin" ? "Admin" : user.name || "User"
+          ) : (
+            "Tamu"
+          )}
         </div>
       </div>
     </header>

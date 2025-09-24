@@ -9,6 +9,7 @@ import api from "../services/api";
 import FilePreview from "reactjs-file-preview";
 import { useAuth } from "../contexts/AuthContexts.jsx";
 import { saveAs } from "file-saver"; 
+import axios from "axios";
 
 const fetcher = (url) => api.get(url).then((res) => res.data);
 
@@ -63,7 +64,7 @@ export default function Kelas() {
 
       const response = await axios.get(fullUrl, {
         responseType: "blob",
-        timeout: 5000, // 30 second timeout
+        timeout: 30000, // 30 second timeout
         headers: {
           Accept: "*/*",
         },
@@ -137,6 +138,22 @@ export default function Kelas() {
 
       <Card>
         {/* Header Tabel */}
+        {/* Ganti bagian search bar dengan form */}
+<form
+  onSubmit={(e) => {
+    e.preventDefault(); 
+    // Tidak perlu set state lagi — searchTerm sudah terupdate via onChange
+  }}
+  className="w-full md:w-96"
+>
+  <input
+    type="text"
+    placeholder="Cari nama, email, atau kelas..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)} 
+    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+</form>
         <div className="flex justify-between items-center mb-6">
           <span className="text-sm text-gray-500">Menampilkan {filteredData.length} peserta</span>
           <Link to="/tambahkelas">
