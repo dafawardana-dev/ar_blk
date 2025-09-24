@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
-import Card from "../components/ui/card.jsx";
+import Card from "../components/ui/Card.jsx";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 
 export default function EditKelas() {

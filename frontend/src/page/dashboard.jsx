@@ -1,5 +1,5 @@
 // src/pages/Dashboard.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import api from "../services/api";
 import {
   ArchiveBoxIcon,
@@ -11,13 +11,31 @@ import {
 } from "@heroicons/react/24/outline";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 
+// Import Recharts
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+
 export default function Dashboard() {
   const [stats, setStats] = useState({ arsip: 0, kelas: 0, modul: 0 });
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fungsi helper untuk format "X waktu yang lalu"
   const getTimeAgo = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -42,14 +60,12 @@ export default function Dashboard() {
           api.get("/modul"),
         ]);
 
-        // Update statistik
         setStats({
           arsip: arsipRes.data.length,
           kelas: kelasRes.data.length,
           modul: modulRes.data.length,
         });
 
-        // Gabungkan aktivitas
         const arsipActivities = arsipRes.data.map((item) => ({
           ...item,
           type: "arsip",
@@ -68,7 +84,6 @@ export default function Dashboard() {
           timeAgo: getTimeAgo(item.createdAt),
         }));
 
-        // Gabungkan dan urutkan (terbaru dulu), ambil 5 teratas
         const allActivities = [...arsipActivities, ...kelasActivities, ...modulActivities]
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
           .slice(0, 5);
@@ -85,6 +100,18 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
+  // Data untuk chart (gunakan data stats yang sudah diambil)
+  const summaryData = useMemo(() => [
+    { name: 'Arsip', value: stats.arsip },
+    { name: 'Kelas', value: stats.kelas },
+    { name: 'Modul', value: stats.modul },
+  ], [stats]);
+
+  const docTypeData = useMemo(() => [
+    { name: 'Surat Masuk', value: stats.arsip },
+    { name: 'Lainnya', value: stats.kelas + stats.modul },
+  ], [stats]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
@@ -98,19 +125,10 @@ export default function Dashboard() {
           </div>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="bg-white rounded-xl shadow p-6 animate-pulse"
-              >
+              <div key={i} className="bg-white rounded-xl shadow p-6 animate-pulse">
                 <div className="h-6 bg-gray-300 rounded w-1/3 mb-4"></div>
                 <div className="h-8 bg-gray-300 rounded w-1/4"></div>
               </div>
-            ))}
-          </div>
-          <div className="mt-8 bg-white rounded-xl shadow p-6 animate-pulse">
-            <div className="h-6 bg-gray-300 rounded w-1/4 mb-6"></div>
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded-lg mb-4"></div>
             ))}
           </div>
         </div>
@@ -139,89 +157,69 @@ export default function Dashboard() {
             <ArchiveBoxIcon className="h-8 w-8 text-white" />
           </div>
           <div className="ml-4">
-            <h1 className="text-3xl font-bold text-gray-800">
-              Dashboard Overview
-            </h1>
-            <p className="text-gray-500">
-              Selamat datang di sistem arsip dokumen BLK
-            </p>
+            <h1 className="text-3xl font-bold text-gray-800">Dashboard Admin</h1>
+            <p className="text-gray-500">Selamat datang di sistem arsip dokumen BLK</p>
           </div>
         </div>
 
-        {/* Statistik Ringkasan */}
+        {/* Statistik Ringkasan (Teks) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Card 1: Total Arsip */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-                  Total Arsip
-                </p>
-                <p className="text-3xl font-bold text-gray-800 mt-1">
-                  {stats.arsip}
-                </p>
-              </div>
-              <div className="p-3 bg-blue-100 rounded-full">
-                <DocumentTextIcon className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-blue-600 h-2 rounded-full"
-                  style={{ width: `${Math.min(stats.arsip * 2, 100)}%` }}
-                ></div>
-              </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Arsip</p>
+            <p className="text-3xl font-bold text-gray-800 mt-1">{stats.arsip}</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Kelas</p>
+            <p className="text-3xl font-bold text-gray-800 mt-1">{stats.kelas}</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Modul</p>
+            <p className="text-3xl font-bold text-gray-800 mt-1">{stats.modul}</p>
+          </div>
+        </div>
+
+        {/* Chart Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Bar Chart: Ringkasan */}
+          <div className="bg-white p-4 rounded-xl shadow">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Statistik Sistem</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={summaryData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="value" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Card 2: Total Kelas */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-                  Total Kelas
-                </p>
-                <p className="text-3xl font-bold text-gray-800 mt-1">
-                  {stats.kelas}
-                </p>
-              </div>
-              <div className="p-3 bg-green-100 rounded-full">
-                <AcademicCapIcon className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-green-600 h-2 rounded-full"
-                  style={{ width: `${Math.min(stats.kelas * 5, 100)}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 3: Total Modul */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-                  Total Modul
-                </p>
-                <p className="text-3xl font-bold text-gray-800 mt-1">
-                  {stats.modul}
-                </p>
-              </div>
-              <div className="p-3 bg-purple-100 rounded-full">
-                <BookOpenIcon className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-purple-600 h-2 rounded-full"
-                  style={{ width: `${Math.min(stats.modul * 4, 100)}%` }}
-                ></div>
-              </div>
+          {/* Pie Chart: Distribusi */}
+          <div className="bg-white p-4 rounded-xl shadow">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Distribusi Dokumen</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={docTypeData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {docTypeData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
@@ -229,9 +227,7 @@ export default function Dashboard() {
         {/* Aktivitas Terbaru */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-800">
-              Aktivitas Terbaru
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-800">Aktivitas Terbaru</h2>
             <button
               onClick={() => window.location.reload()}
               className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium"
@@ -250,7 +246,6 @@ export default function Dashboard() {
                   key={index}
                   className="flex items-start p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
                 >
-                  {/* Ikon */}
                   <div
                     className={`p-2 rounded-lg mr-4 ${
                       activity.type === "arsip"
@@ -260,26 +255,15 @@ export default function Dashboard() {
                         : "bg-purple-100 text-purple-600"
                     }`}
                   >
-                    {activity.type === "arsip" && (
-                      <DocumentTextIcon className="h-5 w-5" />
-                    )}
-                    {activity.type === "kelas" && (
-                      <UserGroupIcon className="h-5 w-5" />
-                    )}
-                    {activity.type === "modul" && (
-                      <BookOpenIcon className="h-5 w-5" />
-                    )}
+                    {activity.type === "arsip" && <DocumentTextIcon className="h-5 w-5" />}
+                    {activity.type === "kelas" && <UserGroupIcon className="h-5 w-5" />}
+                    {activity.type === "modul" && <BookOpenIcon className="h-5 w-5" />}
                   </div>
-
-                  {/* Konten */}
                   <div className="flex-1">
                     <p className="font-medium text-gray-800">
-                      {activity.type === "arsip" &&
-                        `Surat Masuk: ${activity.judul}`}
-                      {activity.type === "kelas" &&
-                        `Peserta Baru: ${activity.nama}`}
-                      {activity.type === "modul" &&
-                        `Modul Baru: ${activity.judul}`}
+                      {activity.type === "arsip" && `Surat Masuk: ${activity.judul}`}
+                      {activity.type === "kelas" && `Peserta Baru: ${activity.nama}`}
+                      {activity.type === "modul" && `Modul Baru: ${activity.judul}`}
                     </p>
                     <div className="flex items-center mt-1 text-sm text-gray-500">
                       <ClockIcon className="h-4 w-4 mr-1" />
@@ -292,10 +276,7 @@ export default function Dashboard() {
           )}
 
           <div className="mt-6 pt-4 border-t border-gray-200 text-center">
-            <a
-              href="#"
-              className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-            >
+            <a href="#" className="text-blue-600 hover:text-blue-800 font-medium text-sm">
               Lihat semua aktivitas →
             </a>
           </div>
